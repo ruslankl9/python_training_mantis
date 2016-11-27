@@ -31,25 +31,25 @@ class ProjectHelper(object):
 
     def open_manage_overview_page(self):
         wd = self.app.wd
-        wd.find_element_by_css_selector("a.manage-menu-link").click()
+        wd.find_element_by_xpath("//a[text()='Manage']").click()
 
     def open_projects_page(self):
         wd = self.app.wd
         if not wd.current_url.endswith("/manage_proj_page.php"):
             if not wd.current_url.endswith("/manage_overview_page.php"):
                 self.open_manage_overview_page()
-            wd.find_element_by_css_selector("div#manage-menu ul li:nth-child(2) a").click()
+            wd.find_element_by_xpath("//a[text()='Manage Projects']").click()
 
     def fill_project_form(self, project):
         status_values = {
-            'в разработке': '10',
-            'выпущен': '30',
-            'стабильный': '50',
-            'устарел': '70'
+            'development': '10',
+            'release': '30',
+            'stable': '50',
+            'obsolete': '70'
         }
         view_state_values = {
-            'публичная': '10',
-            'приватная': '50'
+            'public': '10',
+            'private': '50'
         }
         self.change_field_value("name", project.name)
         self.change_select_value("status", status_values[project.status])
@@ -59,7 +59,7 @@ class ProjectHelper(object):
     def return_to_projects_page(self):
         wd = self.app.wd
         if not wd.current_url.endswith("manage_proj_page.php"):
-            wd.find_element_by_xpath("//div/div[4]/div/span/a").click()
+            wd.find_element_by_xpath("//a[text()='Proceed']").click()
 
     def create(self, project):
         wd = self.app.wd
@@ -68,7 +68,7 @@ class ProjectHelper(object):
         wd.find_element_by_css_selector("form[action='manage_proj_create_page.php'] input[type='submit']").click()
         self.fill_project_form(project)
         # submit project creation
-        wd.find_element_by_css_selector("form#manage-project-create-form input[type='submit']").click()
+        wd.find_element_by_css_selector("input[value='Add Project']").click()
         self.return_to_projects_page()
         self.project_cache = None
 
@@ -83,9 +83,9 @@ class ProjectHelper(object):
         self.open_projects_page()
         self.open_project_by_id(id)
         # submit deletion
-        wd.find_element_by_css_selector("form#project-delete-form input[type='submit']").click()
+        wd.find_element_by_css_selector("input[value='Delete Project']").click()
         # click confirm button
-        wd.find_element_by_css_selector("#content input[type='submit']").click()
+        wd.find_element_by_css_selector("input[value='Delete Project']").click()
         self.return_to_projects_page()
         self.project_cache = None
 
@@ -94,7 +94,7 @@ class ProjectHelper(object):
             wd = self.app.wd
             self.open_projects_page()
             self.project_cache = []
-            for tr in wd.find_elements_by_css_selector("#content div:nth-child(2) tbody tr"):
+            for tr in wd.find_elements_by_xpath("//table[3]//tbody//tr[@class='row-1' or @class='row-2']"):
                 href = tr.find_element_by_css_selector("td:nth-child(1) a").get_attribute("href")
                 id = re.findall(r"\?project_id=(\d+)", href)[0]
                 name = tr.find_element_by_css_selector("td:nth-child(1) a").text
